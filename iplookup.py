@@ -19,7 +19,7 @@
 #	210812	technocake	made alpha version, capable of lookups.
 #
 ##########################################################################################
-import csv, math, sys, re
+import csv, math, sys, re, socket
 
 db = []	# db in memory.
 
@@ -82,6 +82,7 @@ def parseIpDB(dbfile='IpToCountry.csv'):
 def lookup(ipv4):
 	""" Lookup function  ipv4 --> ipfrom, ipto, reg, date, ctr,cntr,country """
 	global db
+	ipv4 = socket.gethostbyname(ipv4)
 	#Converting to decimal formated ip
 	ip = ip2dec(ipv4)
 	
