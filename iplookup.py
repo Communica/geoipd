@@ -4,12 +4,12 @@
 #
 #	Geo-ip loookup based on the database provided by: http://software77.net/geo-ip/
 #	To fetch the latest version of the db:
-#	
-#		 wget software77.net/geo-ip/?DL=1 -O /path/IpToCountry.csv.gz      IPV4 gzip	
+#
+#		 wget software77.net/geo-ip/?DL=1 -O /path/IpToCountry.csv.gz      IPV4 gzip
 #
 #	OR:
 #
-# 		 wget software77.net/geo-ip/?DL=2 -O /path/IpToCountry.csv.zip     IPV4 zip	
+# 		 wget software77.net/geo-ip/?DL=2 -O /path/IpToCountry.csv.zip     IPV4 zip
 #
 #	Locally cached db.
 #
@@ -17,11 +17,11 @@
 # @changelog:
 #	when	who			what
 #	210812	technocake	made alpha version, capable of lookups.
-#
+#	270812	technocake	fixed proper json formatting
 ##########################################################################################
-import csv, math, sys, re, socket
+import csv, math, sys, re, socket, json
 
-db = []	# db in memory.
+db = []	 # db in memory.
 
 
 def ip2dec(ipv4):
@@ -40,16 +40,16 @@ def iprange2net(fromip, toip):
 		Returns a tuple of network and mask in CIDR notation
 		"""
 	#Dirty assumption here!
-	net = fromip 
+	net = fromip
 	mask = int( 32 - math.log( (toip - fromip) + 1,   2 ) )
-	return (net, mask) 
+	return (net, mask)
 
 
 
 class CommentedFile:
     def __init__(self, f, commentstring="#"):
-    	""" Helper-class for parsing commented csv files. 
-	  	@see: http://www.mfasold.net/blog/2010/02/python-recipe-read-csvtsv-textfiles-and-ignore-comment-lines/ 
+    	""" Helper-class for parsing commented csv files.
+	  	@see: http://www.mfasold.net/blog/2010/02/python-recipe-read-csvtsv-textfiles-and-ignore-comment-lines/
 	  	"""
         self.f = f
         self.commentstring = commentstring
@@ -71,21 +71,24 @@ def parseIpDB(dbfile='IpToCountry.csv'):
 		CommentedFile(
 			open(dbfile, 'rb'),
 		 	'#'
-		) 	
+		)
 	)
-	
+
 	#ipfrom, ipto, reg, date, ctr,cntr,country
 	for row in ipreader:
 		db.append(row)
-	
+
 
 def lookup(ipv4):
 	""" Lookup function  ipv4 --> ipfrom, ipto, reg, date, ctr,cntr,country """
 	global db
-	ipv4 = socket.gethostbyname(ipv4)
+	try:
+		ipv4 = socket.gethostbyname(ipv4)
+	except:
+		return ['']
 	#Converting to decimal formated ip
 	ip = ip2dec(ipv4)
-	
+
 	#ipfrom, ipto, reg, date, ctr,cntr,country
 	for row in db:
 		if int(row[1]) < ip: continue
@@ -94,14 +97,18 @@ def lookup(ipv4):
 
 def lookup_ctr(ipv4):
 	""" Lookup function:   ipv4 --> country code
-		Example: 	
-			lookup_ctr('158.37.91.42') --> NO 
+		Example:
+			lookup_ctr('158.37.91.42') --> NO
 	"""
 	#ipfrom, ipto, reg, date, ctr,cntr,country
-	return lookup(ipv4)[4]
+	try:
+		return lookup(ipv4)[4]
+	except:
+		return "{}"
 
 #tests
 if __name__ == '__main__':
 	parseIpDB()
+	print lookup('158.37.91.42')
 	print lookup_ctr('158.37.91.42')
 	print ip2dec('158.37.91.42')
