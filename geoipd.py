@@ -12,7 +12,7 @@
 #	210812	technocake	made alpha version, capable of lookups.
 #
 ##########################################################################################
-import iplookup, sys, socket, random, time, threading, math, copy, os, pdb, cPickle, re
+import iplookup, sys, socket, random, time, threading, math, copy, os, pdb, cPickle, re, json
 from prompt import *
 
 try:
@@ -28,7 +28,7 @@ iplookup.parseIpDB()
 #http://docs.python.org/library/socketserver.html
 
 DEBUG = False
-HOST, PORT = '', 1337
+HOST, PORT = 'geoip.komsys.org', 80
 
 #
 #
